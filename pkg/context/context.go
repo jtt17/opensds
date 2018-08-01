@@ -22,7 +22,8 @@ import (
 	"reflect"
 
 	"github.com/astaxie/beego/context"
-	"github.com/golang/glog"
+//	"github.com/golang/glog"
+	log "github.com/opensds/opensds/pkg/utils/logs"
 )
 
 func NewAdminContext() *Context {

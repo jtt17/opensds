@@ -20,7 +20,8 @@ import (
 	"reflect"
 
 	"github.com/astaxie/beego"
-	log "github.com/golang/glog"
+//	log "github.com/golang/glog"
+	log "github.com/opensds/opensds/pkg/utils/logs"
 	"github.com/opensds/opensds/pkg/model"
 )
 

@@ -23,7 +23,8 @@ package executor
 import (
 	"errors"
 
-	log "github.com/golang/glog"
+//	log "github.com/golang/glog"
+	log "github.com/opensds/opensds/pkg/utils/logs"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
 )

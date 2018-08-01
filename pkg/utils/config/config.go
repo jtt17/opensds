@@ -21,7 +21,8 @@ import (
 	"strings"
 
 	"github.com/go-ini/ini"
-	log "github.com/golang/glog"
+	log "github.com/opensds/opensds/pkg/utils/logs"
+	//	log "github.com/golang/glog"
 )
 
 const (

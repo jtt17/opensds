@@ -24,7 +24,8 @@ import (
 	"fmt"
 	"strconv"
 
-	log "github.com/golang/glog"
+//	log "github.com/golang/glog"
+	log "github.com/opensds/opensds/pkg/utils/logs"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller/dr"
 	"github.com/opensds/opensds/pkg/controller/policy"

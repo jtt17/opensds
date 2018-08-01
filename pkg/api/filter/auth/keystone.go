@@ -22,7 +22,8 @@ import (
 	"time"
 
 	bctx "github.com/astaxie/beego/context"
-	log "github.com/golang/glog"
+//	log "github.com/golang/glog"
+	log "github.com/opensds/opensds/pkg/utils/logs"
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"

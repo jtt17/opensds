@@ -28,7 +28,8 @@ import (
 	"time"
 
 	"github.com/astaxie/beego"
-	log "github.com/golang/glog"
+//	log "github.com/golang/glog"
+	log "github.com/opensds/opensds/pkg/utils/logs"
 	"github.com/opensds/opensds/contrib/cindercompatibleapi/converter"
 
 	"github.com/opensds/opensds/pkg/model"

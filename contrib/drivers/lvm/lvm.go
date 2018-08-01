@@ -22,7 +22,8 @@ import (
 	"strconv"
 	"strings"
 
-	log "github.com/golang/glog"
+	log "github.com/opensds/opensds/pkg/utils/logs"
+//	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/drivers/lvm/targets"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	pb "github.com/opensds/opensds/pkg/dock/proto"

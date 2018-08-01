@@ -17,7 +17,8 @@ package auth
 import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
-	log "github.com/golang/glog"
+//	log "github.com/golang/glog"
+	log "github.com/opensds/opensds/pkg/utils/logs"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/opensds/opensds/pkg/utils/constants"

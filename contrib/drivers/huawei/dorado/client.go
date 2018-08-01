@@ -23,7 +23,8 @@ import (
 	"strings"
 
 	"github.com/astaxie/beego/httplib"
-	log "github.com/golang/glog"
+//	log "github.com/golang/glog"
+	log "github.com/opensds/opensds/pkg/utils/logs"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 )
 

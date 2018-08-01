@@ -18,7 +18,8 @@ import (
 	gflag "flag"
 	"reflect"
 
-	log "github.com/golang/glog"
+	log "github.com/opensds/opensds/pkg/utils/logs"
+//	log "github.com/golang/glog"
 )
 
 type Flag struct {

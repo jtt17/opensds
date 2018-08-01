@@ -1,56 +1,49 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package logs
-
 import (
-	"flag"
+//	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
-
-	"github.com/golang/glog"
-	"github.com/opensds/opensds/pkg/utils"
+	"path/filepath"
+	"runtime"
+	"strings"
+	"time"
+	"sync"
 )
 
-const DefaultLogDir = "/var/log/opensds"
-
-func init() {
-	//Set OpenSDS default log directory.
-	flag.CommandLine.VisitAll(func(flag *flag.Flag) {
-		if flag.Name == "log_dir" {
-			flag.DefValue = DefaultLogDir
-			flag.Value.Set(DefaultLogDir)
-		}
-	})
+type configuration struct {
+	Path          string `json:"Path"`
+	MaxSize       uint64 `json:"MaxSize"`
+	Level         int32  `json:"Level"`
+	Ldate         bool   `json:"Ldate"`
+	Ltime         bool   `json:"Ltime"`
+	Lmicroseconds bool   `json:"Lmicroseconds"`
+	LUTC          bool   `json:"LUTC"`
+	LogToFile     bool   `json:"LogToFile"`
+	LogToStdErr   bool   `json:"LogToStdErr"`
+	Total         int64
 }
 
-type GlogWriter struct{}
-
-func (writer GlogWriter) Write(data []byte) (n int, err error) {
-	glog.Info(string(data))
-	return len(data), nil
-}
-
-func InitLogs() {
-	log.SetOutput(GlogWriter{})
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	logDir := flag.CommandLine.Lookup("log_dir").Value.String()
-	if exist, _ := utils.PathExists(logDir); !exist {
-		os.MkdirAll(logDir, 0755)
-	}
-}
-
-func FlushLogs() {
-	glog.Flush()
-}
+const (
+	info int32 = iota
+	warn
+	erro
+	fata
+)
+var (
+	program = filepath.Base(os.Args[0]) // program name
+	mu		 sync.Mutex
+	conf     configuration
+	flog     *log.Logger
+	now      time.Time
+	curFile  *os.File
+	fileinfo *os.FileInfo
+)
+/*
+func loadConf() {
+	lastpath, _ := os.Getwd()
+	os.Chdir("/root/gopath/src/github.com/opensds/opensds/pkg/utils/logs/")
+	file, err := os.Open("conf.json")
+	defer file.Close()
+	os.Chdir(lastpath)
