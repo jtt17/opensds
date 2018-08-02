@@ -1,0 +1,12 @@
+{
+	"Path"		    : "/var/log/opensds",
+	"MaxSize" 		: 1,
+	"Level"	  		: -1,
+	"Ldate"	     	: true,
+	"Ltime"	 		: false,
+	"Lmicroseconds"	: true,
+	"LUTC"	        : false,
+	"LogToFile"     : true,
+	"LogToStdErr"   : true
+}
+

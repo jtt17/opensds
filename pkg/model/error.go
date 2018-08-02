@@ -24,9 +24,9 @@ import (
 	"fmt"
 
 	"github.com/astaxie/beego/context"
-	log "github.com/opensds/opensds/pkg/utils/logs"
-	//	log "github.com/golang/glog"
-)
+//	log "github.com/golang/glog"
+	log "github.com/opensds/opensds/pkg/utils/logs"	
+	)
 
 const (
 	// ErrorBadRequest

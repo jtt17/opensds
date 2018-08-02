@@ -23,8 +23,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-//	log "github.com/golang/glog"
+
 	log "github.com/opensds/opensds/pkg/utils/logs"
+//	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/api/policy"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"

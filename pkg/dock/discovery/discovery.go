@@ -25,8 +25,7 @@ import (
 	"runtime"
 	"time"
 
-//	log "github.com/golang/glog"
-	log "github.com/opensds/opensds/pkg/utils/logs"
+	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/connector/iscsi"
 	"github.com/opensds/opensds/contrib/drivers"
 	c "github.com/opensds/opensds/pkg/context"

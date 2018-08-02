@@ -21,8 +21,8 @@ import (
 	"os"
 	"reflect"
 
-	log "github.com/opensds/opensds/pkg/utils/logs"
 //	log "github.com/golang/glog"
+	log "github.com/opensds/opensds/pkg/utils/logs"
 )
 
 func Contained(obj, target interface{}) bool {

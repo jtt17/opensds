@@ -21,7 +21,6 @@ import (
 	"path"
 	"strconv"
 	"strings"
-
 	log "github.com/opensds/opensds/pkg/utils/logs"
 //	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/drivers/lvm/targets"
@@ -327,7 +326,7 @@ func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, erro
 		"-L", size,
 		lvPath,
 	}); err != nil {
-		log.Error("Failed to extend logic volume:", err)
+		log.Error("what will happend !!!!!!!Failed to extend logic volume:", err)
 		return nil, err
 	}
 

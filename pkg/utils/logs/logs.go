@@ -12,7 +12,7 @@ import (
 	"time"
 	"sync"
 )
-//test
+
 type configuration struct {
 	Path          string `json:"Path"`
 	MaxSize       uint64 `json:"MaxSize"`
@@ -39,6 +39,7 @@ var (
 	flog     *log.Logger
 	now      time.Time
 	curFile  *os.File
+	fileinfo *os.FileInfo
 )
 /*
 func loadConf() {
@@ -104,41 +105,52 @@ func init() {
 		tmp |= log.LUTC
 	}
 	log.SetFlags(tmp)
-	initFile(conf.Path)
+	curFile, fileinfo = initFile(conf.Path)
 }
 
-func initFile(path string) {
+func initFile(path string) (*os.File, *os.FileInfo) {
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		Error(err)
-		return
+		return nil, nil
 	}
 	l := len(files)
 	fmt.Println("Got Log File List :",files)
 	if l == 0 {
-		return
+		return nil, nil
 	}
 	if uint64(files[l-1].Size()) >= conf.MaxSize {
-		return
+		return nil, nil
 	}
 	tmpfile, e1 := os.OpenFile(filepath.Join(conf.Path, files[l-1].Name()), os.O_WRONLY|os.O_APPEND, 0666)
 	if e1 != nil {
-		return
+		return nil, nil
 	}
-	curFile = tmpfile
+	tmpinfo, e2 := os.Stat(tmpfile.Name())
+	if e2 != nil {
+		return nil,nil
+	}
+	fmt.Println("INIT: Now should USE FILE: ",tmpfile.Name())
+	return tmpfile, &tmpinfo
 }
 
-func open() {
+func open()(*os.File,*os.FileInfo) {
+	if fileinfo == nil {
+		return nil,nil
+	}
 	fmt.Println("Attempt to OPEN file ",(*fileinfo).Name())
-	file, err := os.OpenFile(filepath.Join(conf.Path, curFile.Name()), os.O_WRONLY|os.O_APPEND, 0666)
+	file, err := os.OpenFile(filepath.Join(conf.Path, (*fileinfo).Name()), os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
-		fmt.Println("OPEN: Can not open Log file",curFile.Name())
-		return
+		fmt.Println("OPEN: Can not open Log file",(*fileinfo).Name())
+		Error("can not open log file :", err)
+		return nil, nil
 	}
 	fmt.Println("OPEN : open file success ",file.Name())
-	curFile = file
+//    file.WriteString(fmt.Sprintf("Log file Append at: %v\n\n", time.Now().Format("2018-01-02 15:04:05.000000")))
+	tmpinfo, _ := os.Stat(file.Name())
+	return file, &tmpinfo
 }
-func create() {
+func create()(*os.File, *os.FileInfo)  {
 	name := fmt.Sprintf("%s %04d-%02d-%02d %02d.%02d.%02d.log",
 		filepath.Join(conf.Path, program),
 		time.Now().Year(),
@@ -151,10 +163,15 @@ func create() {
 	file, err := os.OpenFile(name, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		fmt.Printf("create file failed %v\n", err)
-		return 
+		return nil, nil
 	}
 	file.WriteString(fmt.Sprintf("Log file Create at: %v\n\n", time.Now().Format("2018-01-02 15:04:05.000000")))
-	curFile = file
+	tmpinfo ,e := os.Stat(name)
+	if e != nil {
+		fmt.Println("get fileinfo failed ",e)
+		return nil, nil
+	}
+	return file, &tmpinfo
 }
 
 //
@@ -162,22 +179,14 @@ func create() {
 func doPrint(s string) {
 	mu.Lock()
 	defer mu.Unlock()
-	var fileinfo os.FileInfo
-	var err error
-	if curFile != nil {
-		fileinfo,err = os.Stat(curFile.Name())
-		if err != nil {
-			fmt.Println("can not get file info")
-		}
-	}
-	if fileinfo == nil || (uint64)(fileinfo.Size()) >= conf.MaxSize {
-		if curFile != nil {
-			curFile.Close()
-		}
-		create()
+	curFile, fileinfo = open()
+	if fileinfo == nil || (uint64)((*fileinfo).Size()) >= conf.MaxSize {
+		fmt.Println("DOPRINT: but still need create ")
+		curFile, fileinfo = create()
 	}
 	flog = log.New(curFile, "", log.Flags())
 	flog.Println(s)
+	curFile.Close()
 }
 func doInfo(v string) {
 	if info < conf.Level {

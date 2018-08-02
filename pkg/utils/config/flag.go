@@ -17,7 +17,6 @@ package config
 import (
 	gflag "flag"
 	"reflect"
-
 	log "github.com/opensds/opensds/pkg/utils/logs"
 //	log "github.com/golang/glog"
 )
