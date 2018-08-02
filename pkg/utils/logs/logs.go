@@ -201,17 +201,17 @@ func doInfo(v string) {
 }
 func Info(v ...interface{}) {
 	_, file, link, _ := runtime.Caller(1)
-	s := fmt.Sprint("[Info]: ", file, " ", link, v)
+	s := fmt.Sprint("[Info]: ", file[strings.LastIndex(file,"opensds"):], " ", link, v)
 	doInfo(s)
 }
 func Infof(format string, v ...interface{}) {
 	_, file, link, _ := runtime.Caller(1)
-	s := fmt.Sprint("[Info]: ", file, " ", link, v)
+	s := fmt.Sprint("[Info]: ", file[strings.LastIndex(file,"opensds"):], " ", link, v)
 	doInfo(s)
 }
 func Infoln(v ...interface{}) {
 	_, file, link, _ := runtime.Caller(1)
-	s := fmt.Sprintln("[Info]:", file, link, v)
+	s := fmt.Sprintln("[Info]:", file[strings.LastIndex(file,"opensds"):], link, v)
 	doInfo(s)
 }
 func doWarn(v string) {
@@ -228,17 +228,17 @@ func doWarn(v string) {
 
 func Warning(v ...interface{}) {
 	_, file, link, _ := runtime.Caller(1)
-	s := fmt.Sprint("[Warn]: ", file, " ", link, v)
+	s := fmt.Sprint("[Warn]: ", file[strings.LastIndex(file,"opensds"):], " ", link, v)
 	doWarn(s)
 }
 func Warningf(format string, v ...interface{}) {
 	_, file, link, _ := runtime.Caller(1)
-	s := fmt.Sprint("[Warn]: ", file, " ", link, v)
+	s := fmt.Sprint("[Warn]: ", file[strings.LastIndex(file,"opensds"):], " ", link, v)
 	doWarn(s)
 }
 func Warningln(v ...interface{}) {
 	_, file, link, _ := runtime.Caller(1)
-	s := fmt.Sprintln("[Warn]:", file, link, v)
+	s := fmt.Sprintln("[Warn]:", file[strings.LastIndex(file,"opensds"):], link, v)
 	doWarn(s)
 }
 func doError(s string) {
@@ -255,17 +255,17 @@ func doError(s string) {
 
 func Error(v ...interface{}) {
 	_, file, link, _ := runtime.Caller(1)
-	s := fmt.Sprint("[Erro]: ", file, " ", link, v)
+	s := fmt.Sprint("[Erro]: ", file[strings.LastIndex(file,"opensds"):], " ", link, v)
 	doError(s)
 }
 func Errorf(format string, v ...interface{}) {
 	_, file, link, _ := runtime.Caller(1)
-	s := fmt.Sprint("[Erro]: ", file, " ", link, v)
+	s := fmt.Sprint("[Erro]: ", file[strings.LastIndex(file,"opensds"):], " ", link, v)
 	doError(s)
 }
 func Errorln(v ...interface{}) {
 	_, file, link, _ := runtime.Caller(1)
-	s := fmt.Sprintln("[Erro]:", file, link, v)
+	s := fmt.Sprintln("[Erro]:", file[strings.LastIndex(file,"opensds"):], link, v)
 	doError(s)
 }
 func doFatal(s string) {
@@ -285,17 +285,17 @@ func doFatal(s string) {
 }
 func Fatal(v ...interface{}) {
 	_, file, link, _ := runtime.Caller(1)
-	s := fmt.Sprint("[Fata]: ", file, " ", link, v)
+	s := fmt.Sprint("[Fata]: ", file[strings.LastIndex(file,"opensds"):], " ", link, v)
 	doFatal(s)
 }
 func Fatalf(format string, v ...interface{}) {
 	_, file, link, _ := runtime.Caller(1)
-	s := fmt.Sprint("[Fata]: ", file, " ", link, v)
+	s := fmt.Sprint("[Fata]: ", file[strings.LastIndex(file,"opensds"):], " ", link, v)
 	doFatal(s)
 }
 func Fatalln(v ...interface{}) {
 	_, file, link, _ := runtime.Caller(1)
-	s := fmt.Sprintln("[Fata]:", file, link, v)
+	s := fmt.Sprintln("[Fata]:", file[strings.LastIndex(file,"opensds"):], link, v)
 	doFatal(s)
 }
 
@@ -315,21 +315,21 @@ func V(level int32) Verbose {
 func (v Verbose) Info(args ...interface{}) {
 	if v {
 		_, file, link, _ := runtime.Caller(1)
-		s := fmt.Sprint("[Info]: ", file, " ", link, args)
+		s := fmt.Sprint("[Info]: ", file[strings.LastIndex(file,"opensds"):], " ", link, args)
 		doInfo(s)
 	}
 }
 func (v Verbose) Infof(format string, args ...interface{}) {
 	if v {
 		_, file, link, _ := runtime.Caller(1)
-		s := fmt.Sprint("[Info]: ", file, " ", link, args)
+		s := fmt.Sprint("[Info]: ", file[strings.LastIndex(file,"opensds"):], " ", link, args)
 		doInfo(s)
 	}
 }
 func (v Verbose) Infoln(args ...interface{}) {
 	if v {
 		_, file, link, _ := runtime.Caller(1)
-		s := fmt.Sprintln("[Info]: ", file, " ", link, args)
+		s := fmt.Sprintln("[Info]: ", file[strings.LastIndex(file,"opensds"):], " ", link, args)
 		doInfo(s)
 	}
 }
