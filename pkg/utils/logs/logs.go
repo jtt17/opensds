@@ -12,7 +12,7 @@ import (
 	"time"
 	"sync"
 )
-
+//test
 type configuration struct {
 	Path          string `json:"Path"`
 	MaxSize       uint64 `json:"MaxSize"`
