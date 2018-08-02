@@ -326,7 +326,7 @@ func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, erro
 		"-L", size,
 		lvPath,
 	}); err != nil {
-		log.Error("what will happend !!!!!!!Failed to extend logic volume:", err)
+		log.Error("Failed to extend logic volume:", err)
 		return nil, err
 	}
 
