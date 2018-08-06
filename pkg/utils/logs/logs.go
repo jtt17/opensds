@@ -43,25 +43,7 @@ var (
 	logmsg   []string
 	lastTime time.Time
 )
-/*
 func loadConf() {
-	lastpath, _ := os.Getwd()
-	os.Chdir("/root/gopath/src/github.com/opensds/opensds/pkg/utils/logs/")
-	file, err := os.Open("conf.json")
-	defer file.Close()
-	os.Chdir(lastpath)
-	if err != nil {
-		Error("Error occur when open conf.json ", err)
-	}
-	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&conf)
-	if err != nil {
-		Error("Error occur when decode conf.json ", err)
-	}
-}*/
-
-func loadConf() {
-
 	conf.Path = filepath.Join("/var/log/opensds", strings.Split(program, ".")[0])
 	conf.Level = -1
 	conf.Ldate = true
@@ -142,15 +124,10 @@ func open()(*os.File,*os.FileInfo) {
 	if fileinfo == nil {
 		return nil,nil
 	}
-	fmt.Println("Attempt to OPEN file ",(*fileinfo).Name())
 	file, err := os.OpenFile(filepath.Join(conf.Path, (*fileinfo).Name()), os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
-		fmt.Println("OPEN: Can not open Log file",(*fileinfo).Name())
-		Error("can not open log file :", err)
 		return nil, nil
 	}
-	fmt.Println("OPEN : open file success ",file.Name())
-//    file.WriteString(fmt.Sprintf("Log file Append at: %v\n\n", time.Now().Format("2018-01-02 15:04:05.000000")))
 	tmpinfo, _ := os.Stat(file.Name())
 	return file, &tmpinfo
 }
@@ -163,10 +140,8 @@ func create()(*os.File, *os.FileInfo)  {
 		time.Now().Hour(),
 		time.Now().Minute(),
 		time.Now().Second())
-	fmt.Println("CREATE : now create file ",name )
 	file, err := os.OpenFile(name, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
-		fmt.Printf("create file failed %v\n", err)
 		return nil, nil
 	}
 	file.WriteString(fmt.Sprintf("Log file Create at: %v\n\n", time.Now().Format("2018-01-02 15:04:05.000000")))
