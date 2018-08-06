@@ -40,6 +40,8 @@ var (
 	now      time.Time
 	curFile  *os.File
 	fileinfo *os.FileInfo
+	logmsg   []string
+	lastTime time.Time
 )
 /*
 func loadConf() {
@@ -106,6 +108,8 @@ func init() {
 	}
 	log.SetFlags(tmp)
 	curFile, fileinfo = initFile(conf.Path)
+	logmsg = []string{}
+	lastTime = time.Now()
 }
 
 func initFile(path string) (*os.File, *os.FileInfo) {
@@ -177,16 +181,22 @@ func create()(*os.File, *os.FileInfo)  {
 //
 //
 func doPrint(s string) {
-	mu.Lock()
-	defer mu.Unlock()
+	logmsg = append(logmsg, s)
+	if time.Now().Sub(lastTime).Seconds() < 30 { //seconds
+		return
+	}
 	curFile, fileinfo = open()
 	if fileinfo == nil || (uint64)((*fileinfo).Size()) >= conf.MaxSize {
-		fmt.Println("DOPRINT: but still need create ")
 		curFile, fileinfo = create()
 	}
 	flog = log.New(curFile, "", log.Flags())
-	flog.Println(s)
+
+	for _, x := range logmsg {
+		flog.Println(x)
+	}
 	curFile.Close()
+	logmsg = []string{}
+	lastTime = time.Now()
 }
 func doInfo(v string) {
 	if info < conf.Level {
@@ -300,7 +310,18 @@ func Fatalln(v ...interface{}) {
 }
 
 func FlushLogs() {
+	curFile, fileinfo = open()
+	if fileinfo == nil || (uint64)((*fileinfo).Size()) >= conf.MaxSize {
+		curFile, fileinfo = create()
+	}
+	flog = log.New(curFile, "", log.Flags())
 
+	for _, x := range logmsg {
+		flog.Println(x)
+	}
+	curFile.Close()
+	logmsg = []string{}
+	lastTime = time.Now()
 }
 func InitLogs(){
 }
