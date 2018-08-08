@@ -33,7 +33,7 @@ const (
 	fata
 )
 var (
-	program = filepath.Base(os.Args[0]) // program name
+	program = strings.Split(filepath.Base(os.Args[0]),".")[0] // program name
 	mu		 sync.Mutex
 	conf     configuration
 	flog     *log.Logger
@@ -44,7 +44,7 @@ var (
 	lastTime time.Time
 )
 func loadConf() {
-	conf.Path = filepath.Join("/var/log/opensds", strings.Split(program, ".")[0])
+	conf.Path = filepath.Join("/var/log/opensds")
 	conf.Level = -1
 	conf.Ldate = true
 	conf.Lmicroseconds = true
@@ -93,30 +93,30 @@ func init() {
 	logmsg = []string{}
 	lastTime = time.Now()
 }
-
 func initFile(path string) (*os.File, *os.FileInfo) {
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		return nil, nil
 	}
-	l := len(files)
-	if l == 0 {
+	if len(files) == 0 {
 		return nil, nil
 	}
-	if uint64(files[l-1].Size()) >= conf.MaxSize {
+	var tmpinfo os.FileInfo
+	for _, x := range files {
+		if strings.Contains(x.Name(), program) && uint64(x.Size()) < conf.MaxSize {
+			tmpinfo = x
+			break
+		}
+	}
+	if tmpinfo == nil {
 		return nil, nil
 	}
-	tmpfile, e1 := os.OpenFile(filepath.Join(conf.Path, files[l-1].Name()), os.O_WRONLY|os.O_APPEND, 0666)
+	tmpfile, e1 := os.OpenFile(filepath.Join(conf.Path, tmpinfo.Name()), os.O_WRONLY|os.O_APPEND, 0666)
 	if e1 != nil {
 		return nil, nil
 	}
-	tmpinfo, e2 := os.Stat(tmpfile.Name())
-	if e2 != nil {
-		return nil,nil
-	}
 	return tmpfile, &tmpinfo
 }
-
 func open()(*os.File,*os.FileInfo) {
 	if fileinfo == nil {
 		return nil,nil
@@ -129,7 +129,7 @@ func open()(*os.File,*os.FileInfo) {
 	return file, &tmpinfo
 }
 func create()(*os.File, *os.FileInfo)  {
-	name := fmt.Sprintf("%s %04d-%02d-%02d %02d.%02d.%02d.log",
+	name := fmt.Sprintf("%s_%04d-%02d-%02d_%02d.%02d.%02d.log",
 		filepath.Join(conf.Path, program),
 		time.Now().Year(),
 		time.Now().Month(),
