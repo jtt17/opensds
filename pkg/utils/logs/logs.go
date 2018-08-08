@@ -161,6 +161,8 @@ func create()(*os.File, *os.FileInfo)  {
 //
 //
 func outPut() {
+	mu.Lock()
+	defer mu.Unlock()
 	curFile, fileinfo = open()
 	if fileinfo == nil || (uint64)((*fileinfo).Size()) >= conf.MaxSize {
 		curFile, fileinfo = create()
