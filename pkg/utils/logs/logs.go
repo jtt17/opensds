@@ -50,7 +50,7 @@ func loadConf() {
 	conf.Lmicroseconds = true
 	conf.LogToFile = true
 	conf.LogToStdErr = true
-	conf.MaxSize = 1024*1024 *1
+	conf.MaxSize = 1024*1024 *10
 }
 
 func exits(path string) bool {
