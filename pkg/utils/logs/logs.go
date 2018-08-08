@@ -97,11 +97,9 @@ func init() {
 func initFile(path string) (*os.File, *os.FileInfo) {
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
-		Error(err)
 		return nil, nil
 	}
 	l := len(files)
-	fmt.Println("Got Log File List :",files)
 	if l == 0 {
 		return nil, nil
 	}
@@ -116,7 +114,6 @@ func initFile(path string) (*os.File, *os.FileInfo) {
 	if e2 != nil {
 		return nil,nil
 	}
-	fmt.Println("INIT: Now should USE FILE: ",tmpfile.Name())
 	return tmpfile, &tmpinfo
 }
 
@@ -266,6 +263,7 @@ func doFatal(s string) {
 	if curFile != nil {
 		curFile.Close()
 	}
+	FlushLogs()
 	os.Exit(1)
 }
 func Fatal(v ...interface{}) {
