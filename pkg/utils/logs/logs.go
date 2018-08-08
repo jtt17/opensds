@@ -41,7 +41,7 @@ var (
 	curFile  *os.File
 	fileinfo *os.FileInfo
 	logmsg   []string
-	lastTime time.Time
+	pid     = os.Getpid()
 )
 func loadConf() {
 	conf.Path = filepath.Join("/var/log/opensds")
@@ -72,9 +72,16 @@ func mkdir() {
 		Fatal(e)
 	}
 }
+const flushInterval = 30 * time.Second
+func flushDaemon(){
+	for _ = range time.NewTicker(flushInterval).C {
+		outPut()
+	}
+}
 func init() {
 	loadConf()
 	mkdir()
+	go flushDaemon()
 	var tmp int = 0
 	if conf.Ldate {
 		tmp |= log.Ldate
@@ -91,20 +98,20 @@ func init() {
 	log.SetFlags(tmp)
 	curFile, fileinfo = initFile(conf.Path)
 	logmsg = []string{}
-	lastTime = time.Now()
 }
 func initFile(path string) (*os.File, *os.FileInfo) {
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		return nil, nil
 	}
-	if len(files) == 0 {
+	l := len(files)
+	if l == 0 {
 		return nil, nil
 	}
 	var tmpinfo os.FileInfo
-	for _, x := range files {
-		if strings.Contains(x.Name(), program) && uint64(x.Size()) < conf.MaxSize {
-			tmpinfo = x
+	for i := l-1 ; i >= 0 ; i -- {
+		if strings.Contains(files[i].Name(), program) && uint64(files[i].Size()) < conf.MaxSize {
+			tmpinfo = files[i]
 			break
 		}
 	}
@@ -142,6 +149,7 @@ func create()(*os.File, *os.FileInfo)  {
 		return nil, nil
 	}
 	file.WriteString(fmt.Sprintf("Log file Create at: %v\n\n", time.Now().Format("2018-01-02 15:04:05.000000")))
+	file.WriteString(fmt.Sprintf("Binary: Built with %s %s for %s %s\n\n",runtime.Compiler,runtime.Version(),runtime.GOOS,runtime.GOARCH))
 	tmpinfo ,e := os.Stat(name)
 	if e != nil {
 		fmt.Println("get fileinfo failed ",e)
@@ -152,23 +160,20 @@ func create()(*os.File, *os.FileInfo)  {
 
 //
 //
-func doPrint(s string) {
-	logmsg = append(logmsg, s)
-	if time.Now().Sub(lastTime).Seconds() < 30 { //seconds
-		return
-	}
+func outPut() {
 	curFile, fileinfo = open()
 	if fileinfo == nil || (uint64)((*fileinfo).Size()) >= conf.MaxSize {
 		curFile, fileinfo = create()
 	}
 	flog = log.New(curFile, "", log.Flags())
-
 	for _, x := range logmsg {
 		flog.Println(x)
 	}
 	curFile.Close()
 	logmsg = []string{}
-	lastTime = time.Now()
+}
+func doPrint(s string) {
+	logmsg = append(logmsg, s)
 }
 func doInfo(v string) {
 	if info < conf.Level {
@@ -294,7 +299,6 @@ func FlushLogs() {
 	}
 	curFile.Close()
 	logmsg = []string{}
-	lastTime = time.Now()
 }
 func InitLogs(){
 }
