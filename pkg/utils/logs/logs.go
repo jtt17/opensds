@@ -277,11 +277,8 @@ func doFatal(s string) {
 	if conf.LogToFile {
 		doPrint(s1 + s)
 	}
-	if curFile != nil {
-		curFile.Close()
-	}
-	//	FlushLogs()
-	//	os.Exit(1)
+	FlushLogs()
+	os.Exit(1)
 }
 func Fatal(v ...interface{}) {
 	s := fmt.Sprint(v)
