@@ -8,9 +8,10 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
-	"time"
 	"sync"
+	"time"
 )
 
 type configuration struct {
@@ -33,15 +34,15 @@ const (
 	fata
 )
 var (
-	program = strings.Split(filepath.Base(os.Args[0]),".")[0] // program name
-	mu		 sync.Mutex
+	program  = strings.Split(filepath.Base(os.Args[0]), ".")[0] // program name
+	mu       sync.Mutex
 	conf     configuration
 	flog     *log.Logger
 	now      time.Time
 	curFile  *os.File
 	fileinfo *os.FileInfo
 	logmsg   []string
-	pid     = os.Getpid()
+	pid      = strconv.Itoa(os.Getpid()) + "] "
 )
 func loadConf() {
 	conf.Path = filepath.Join("/var/log/opensds")
@@ -99,6 +100,7 @@ func init() {
 	curFile, fileinfo = initFile(conf.Path)
 	logmsg = []string{}
 }
+
 func initFile(path string) (*os.File, *os.FileInfo) {
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
@@ -124,6 +126,7 @@ func initFile(path string) (*os.File, *os.FileInfo) {
 	}
 	return tmpfile, &tmpinfo
 }
+
 func open()(*os.File,*os.FileInfo) {
 	if fileinfo == nil {
 		return nil,nil
@@ -148,8 +151,16 @@ func create()(*os.File, *os.FileInfo)  {
 	if err != nil {
 		return nil, nil
 	}
-	file.WriteString(fmt.Sprintf("Log file Create at: %v\n\n", time.Now().Format("2018-01-02 15:04:05.000000")))
-	file.WriteString(fmt.Sprintf("Binary: Built with %s %s for %s %s\n\n",runtime.Compiler,runtime.Version(),runtime.GOOS,runtime.GOARCH))
+	file.WriteString(fmt.Sprintf("Log file Create at: %04d-%02d-%02d %02d:%02d:%02d:%06d\n\n",
+		time.Now().Year(),
+		time.Now().Month(),
+		time.Now().Day(),
+		time.Now().Hour(),
+		time.Now().Minute(),
+		time.Now().Second(),
+		time.Now().Nanosecond()/1000))
+
+	file.WriteString(fmt.Sprintf("Binary: Built with %s %s for %s %s\n\n", runtime.Compiler, runtime.Version(), runtime.GOOS, runtime.GOARCH))
 	tmpinfo ,e := os.Stat(name)
 	if e != nil {
 		fmt.Println("get fileinfo failed ",e)
@@ -175,135 +186,122 @@ func outPut() {
 	logmsg = []string{}
 }
 func doPrint(s string) {
+	mu.Lock()
 	logmsg = append(logmsg, s)
+	mu.Unlock()
 }
 func doInfo(v string) {
 	if info < conf.Level {
 		return
 	}
+	_, file, link, _ := runtime.Caller(2)
+	s1 := fmt.Sprint("[INFO]: ", file[strings.LastIndex(file,"opensds"):], " ", link, " [PID:", pid)
 	if conf.LogToStdErr {
-		log.Println(v)
+		log.Println(s1 + v)
 	}
 	if conf.LogToFile {
-		doPrint(v)
+		doPrint(s1 + v)
 	}
 }
 func Info(v ...interface{}) {
-	_, file, link, _ := runtime.Caller(1)
-	s := fmt.Sprint("[Info]: ", file[strings.LastIndex(file,"opensds"):], " ", link, v)
+	s := fmt.Sprint(v)
 	doInfo(s)
 }
 func Infof(format string, v ...interface{}) {
-	_, file, link, _ := runtime.Caller(1)
-	s := fmt.Sprint("[Info]: ", file[strings.LastIndex(file,"opensds"):], " ", link, v)
-	doInfo(s)
+	s := fmt.Sprintf(format, v...)
+	doInfo("[" + s + "]")
 }
 func Infoln(v ...interface{}) {
-	_, file, link, _ := runtime.Caller(1)
-	s := fmt.Sprintln("[Info]:", file[strings.LastIndex(file,"opensds"):], link, v)
+	s := fmt.Sprintln(v)
 	doInfo(s)
 }
 func doWarn(v string) {
 	if warn < conf.Level {
 		return
 	}
+	_, file, link, _ := runtime.Caller(2)
+	s1 := fmt.Sprint("[WARN]: ", file[strings.LastIndex(file,"opensds"):], " ", link, " [PID:", pid)
 	if conf.LogToStdErr {
-		log.Println(v)
+		log.Println(s1 + v)
 	}
 	if conf.LogToFile {
-		doPrint(v)
+		doPrint(s1 + v)
 	}
 }
-
 func Warning(v ...interface{}) {
-	_, file, link, _ := runtime.Caller(1)
-	s := fmt.Sprint("[Warn]: ", file[strings.LastIndex(file,"opensds"):], " ", link, v)
+	s := fmt.Sprint(v)
 	doWarn(s)
 }
 func Warningf(format string, v ...interface{}) {
-	_, file, link, _ := runtime.Caller(1)
-	s := fmt.Sprint("[Warn]: ", file[strings.LastIndex(file,"opensds"):], " ", link, v)
-	doWarn(s)
+	s := fmt.Sprintf(format, v...)
+	doWarn("[" + s + "]")
 }
 func Warningln(v ...interface{}) {
-	_, file, link, _ := runtime.Caller(1)
-	s := fmt.Sprintln("[Warn]:", file[strings.LastIndex(file,"opensds"):], link, v)
+	s := fmt.Sprintln(v)
 	doWarn(s)
 }
 func doError(s string) {
 	if erro < conf.Level {
 		return
 	}
+	_, file, link, _ := runtime.Caller(2)
+	s1 := fmt.Sprint("[ERRO]: ", file[strings.LastIndex(file,"opensds"):], " ", link, " [PID:", pid)
 	if conf.LogToStdErr {
-		log.Println(s)
+		log.Println(s1 + s)
 	}
 	if conf.LogToFile {
-		doPrint(s)
+		doPrint(s1 + s)
 	}
 }
-
 func Error(v ...interface{}) {
-	_, file, link, _ := runtime.Caller(1)
-	s := fmt.Sprint("[Erro]: ", file[strings.LastIndex(file,"opensds"):], " ", link, v)
+	s := fmt.Sprint(v)
 	doError(s)
 }
 func Errorf(format string, v ...interface{}) {
-	_, file, link, _ := runtime.Caller(1)
-	s := fmt.Sprint("[Erro]: ", file[strings.LastIndex(file,"opensds"):], " ", link, v)
-	doError(s)
+	s := fmt.Sprintf(format, v...)
+	doError("[" + s + "]")
 }
 func Errorln(v ...interface{}) {
-	_, file, link, _ := runtime.Caller(1)
-	s := fmt.Sprintln("[Erro]:", file[strings.LastIndex(file,"opensds"):], link, v)
+	s := fmt.Sprintln(v)
 	doError(s)
 }
 func doFatal(s string) {
 	if fata < conf.Level {
 		return
 	}
+	_, file, link, _ := runtime.Caller(2)
+	s1 := fmt.Sprint("[FATA]: ", file[strings.LastIndex(file,"opensds"):], " ", link, " [PID:", pid)
 	if conf.LogToStdErr {
-		log.Println(s)
+		log.Println(s1 + s)
 	}
 	if conf.LogToFile {
-		doPrint(s)
+		doPrint(s1 + s)
 	}
 	if curFile != nil {
 		curFile.Close()
 	}
-	FlushLogs()
-	os.Exit(1)
+	//	FlushLogs()
+	//	os.Exit(1)
 }
 func Fatal(v ...interface{}) {
-	_, file, link, _ := runtime.Caller(1)
-	s := fmt.Sprint("[Fata]: ", file[strings.LastIndex(file,"opensds"):], " ", link, v)
+	s := fmt.Sprint(v)
 	doFatal(s)
 }
 func Fatalf(format string, v ...interface{}) {
-	_, file, link, _ := runtime.Caller(1)
-	s := fmt.Sprint("[Fata]: ", file[strings.LastIndex(file,"opensds"):], " ", link, v)
-	doFatal(s)
+	s := fmt.Sprintf(format, v...)
+	doFatal("[" + s + "]")
 }
 func Fatalln(v ...interface{}) {
-	_, file, link, _ := runtime.Caller(1)
-	s := fmt.Sprintln("[Fata]:", file[strings.LastIndex(file,"opensds"):], link, v)
+	s := fmt.Sprintln(v)
 	doFatal(s)
 }
 
 func FlushLogs() {
-	curFile, fileinfo = open()
-	if fileinfo == nil || (uint64)((*fileinfo).Size()) >= conf.MaxSize {
-		curFile, fileinfo = create()
-	}
-	flog = log.New(curFile, "", log.Flags())
+	outPut()
+}
+func InitLogs() {
+}
 
-	for _, x := range logmsg {
-		flog.Println(x)
-	}
-	curFile.Close()
-	logmsg = []string{}
-}
-func InitLogs(){
-}
 type Verbose bool
 
 func V(level int32) Verbose {
@@ -314,23 +312,19 @@ func V(level int32) Verbose {
 }
 func (v Verbose) Info(args ...interface{}) {
 	if v {
-		_, file, link, _ := runtime.Caller(1)
-		s := fmt.Sprint("[Info]: ", file[strings.LastIndex(file,"opensds"):], " ", link, args)
+		s := fmt.Sprint(args)
 		doInfo(s)
 	}
 }
 func (v Verbose) Infof(format string, args ...interface{}) {
 	if v {
-		_, file, link, _ := runtime.Caller(1)
-		s := fmt.Sprint("[Info]: ", file[strings.LastIndex(file,"opensds"):], " ", link, args)
-		doInfo(s)
+		s := fmt.Sprintf(format, args...)
+		doInfo("[" + s + "]")
 	}
 }
 func (v Verbose) Infoln(args ...interface{}) {
 	if v {
-		_, file, link, _ := runtime.Caller(1)
-		s := fmt.Sprintln("[Info]: ", file[strings.LastIndex(file,"opensds"):], " ", link, args)
+		s := fmt.Sprintln(args)
 		doInfo(s)
 	}
 }
-
