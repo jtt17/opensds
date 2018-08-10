@@ -35,15 +35,15 @@ const (
 	fata
 )
 var (
-	program  = strings.Split(filepath.Base(os.Args[0]), ".")[0] // program name
+	program  = strings.Split(filepath.Base(os.Args[0]), ".")[0] // process name
 	mu       sync.Mutex
 	conf     configuration
 	flog     *log.Logger
 	now      time.Time
 	curFile  *os.File
-	filename string //  only hava name   without path
-	logmsg   []string
-	pid      = strconv.Itoa(os.Getpid())
+	filename string                        // record last log file name ,without path
+	logmsg   []string                      //cache log msg
+	pid      = strconv.Itoa(os.Getpid())   //use pid to mark different process,when they write a same file
 )
 func loadConf() {
 	conf.Path = filepath.Join("/var/log/opensds")
@@ -52,7 +52,7 @@ func loadConf() {
 	conf.Lmicroseconds = true
 	conf.LogToFile = true
 	conf.LogToStdErr = true
-	conf.MaxSize = 1024*1024 *10
+	conf.MaxSize = 1024*1024 *10       // 10MB
 }
 
 func exits(path string) bool {
@@ -153,8 +153,6 @@ func Unlock(f *os.File) error {
 //
 //
 func outPut() {
-	mu.Lock()
-	defer mu.Unlock()
 	filename = getFile()
 	if filename == "" {
 		return
@@ -164,14 +162,17 @@ func outPut() {
 		fmt.Println("open log file error", err1)
 		return
 	}
+	mu.Lock()
+	defer mu.Unlock()
 	Lock(file)
 	flog = log.New(file, "", log.Flags())
+	
 	for _, x := range logmsg {
 		flog.Println(x)
 	}
+	logmsg = []string{}
 	Unlock(file)
 	file.Close()
-	logmsg = []string{}
 }
 func doPrint(s string) {
 	mu.Lock()
