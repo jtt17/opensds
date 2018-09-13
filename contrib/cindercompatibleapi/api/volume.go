@@ -40,6 +40,11 @@ type VolumePortal struct {
 	beego.Controller
 }
 
+var (
+	// SleepDuration When running unit tests, it should be set to time.Nanosecond
+	SleepDuration = time.Second
+)
+
 // ListVolumesDetails ...
 func (portal *VolumePortal) ListVolumesDetails() {
 	volumes, err := client.ListVolumes()
@@ -279,7 +284,7 @@ func (portal *VolumePortal) VolumeAction() {
 
 		for {
 			sum++
-			time.Sleep(1e9)
+			time.Sleep(SleepDuration)
 			attachment, _ = client.GetVolumeAttachment(attachment.Id)
 			if ("available" == attachment.Status) && ("" != attachment.ConnectionInfo.DriverVolumeType) &&
 				//(nil != attachment.ConnectionInfo.ConnectionData["authPassword"]) &&

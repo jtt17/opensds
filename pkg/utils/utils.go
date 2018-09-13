@@ -25,6 +25,24 @@ import (
 	log "github.com/opensds/opensds/pkg/utils/logs"
 )
 
+//remove redundant elements
+func RvRepElement(arr []string) []string {
+	result := []string{}
+	for i := 0; i < len(arr); i++ {
+		flag := true
+		for j := range result {
+			if arr[i] == result[j] {
+				flag = false
+				break
+			}
+		}
+		if flag == true {
+			result = append(result, arr[i])
+		}
+	}
+	return result
+}
+
 func Contained(obj, target interface{}) bool {
 	targetValue := reflect.ValueOf(target)
 	switch reflect.TypeOf(target).Kind() {
